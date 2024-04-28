@@ -1,14 +1,21 @@
 ﻿using p3rpc.classconstructor.Configuration;
+using p3rpc.classconstructor.Interfaces;
 using p3rpc.classconstructor.Template;
+using p3rpc.commonmodutils;
+using p3rpc.nativetypes.Interfaces;
 using Reloaded.Hooks.ReloadedII.Interfaces;
+using Reloaded.Memory;
+using Reloaded.Memory.SigScan.ReloadedII.Interfaces;
 using Reloaded.Mod.Interfaces;
+using SharedScans.Interfaces;
+using System.Diagnostics;
 
 namespace p3rpc.classconstructor
 {
     /// <summary>
     /// Your mod logic goes here.
     /// </summary>
-    public class Mod : ModBase // <= Do not Remove.
+    public class Mod : ModBase, IExports // <= Do not Remove.
     {
         /// <summary>
         /// Provides access to the mod loader API.
@@ -41,6 +48,9 @@ namespace p3rpc.classconstructor
         /// </summary>
         private readonly IModConfig _modConfig;
 
+        private ClassConstructorContext _context;
+        private ModuleRuntime<ClassConstructorContext> _modRuntime;
+
         public Mod(ModContext context)
         {
             _modLoader = context.ModLoader;
@@ -50,14 +60,26 @@ namespace p3rpc.classconstructor
             _configuration = context.Configuration;
             _modConfig = context.ModConfig;
 
+            var mainModule = Process.GetCurrentProcess().MainModule;
+            if (mainModule == null) throw new Exception($"[{_modConfig.ModName}] Could not get main module");
+            if (_hooks == null) throw new Exception($"[{_modConfig.ModName}] Could not get controller for Reloaded hooks");
+            _modLoader.GetController<ISharedScans>().TryGetTarget(out var sharedScans);
+            if (sharedScans == null) throw new Exception($"[{_modConfig.ModName}] Could not get controller for Shared Scans");
+            _modLoader.GetController<IStartupScanner>().TryGetTarget(out var startupScanner);
+            if (startupScanner == null) throw new Exception($"[{_modConfig.ModName}] Could not get controller for Startup Scans");
+            _modLoader.GetController<IMemoryMethods>().TryGetTarget(out var memoryMethods);
+            if (memoryMethods == null) throw new Exception($"[{_modConfig.ModName}] Could not get controller for Memory Methods");
+            Utils utils = new(startupScanner, _logger, _hooks, mainModule.BaseAddress, "Class Constructor", System.Drawing.Color.PeachPuff);
+            Memory memory = new Memory();
+            _context = new(mainModule.BaseAddress, _configuration, _logger, startupScanner, _hooks, _modLoader.GetDirectoryForModId(_modConfig.ModId), utils, memory, sharedScans, memoryMethods);
+            _modRuntime = new(_context);
 
-            // For more information about this template, please see
-            // https://reloaded-project.github.io/Reloaded-II/ModTemplate/
+            _modRuntime.AddModule<ClassMethods>();
+            _modRuntime.AddModule<ObjectMethods>();
+            _modRuntime.RegisterModules();
 
-            // If you want to implement e.g. unload support in your mod,
-            // and some other neat features, override the methods in ModBase.
-
-            // TODO: Implement some mod logic
+            //_modLoader.AddOrReplaceController<IClassMethods>(_owner, _modRuntime.GetModule<ClassMethods>());
+            //_modLoader.AddOrReplaceController<IObjectMethods>(_owner, _modRuntime.GetModule<ObjectMethods>());
         }
 
         #region Standard Overrides
@@ -75,5 +97,10 @@ namespace p3rpc.classconstructor
         public Mod() { }
 #pragma warning restore CS8618
         #endregion
+
+        public Type[] GetTypes() => new[] {
+            typeof(IClassMethods),
+            typeof(IObjectMethods)
+        };
     }
 }

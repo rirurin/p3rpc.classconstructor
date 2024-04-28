@@ -5,6 +5,27 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+
+	  <!-- Create NuGet Package and include your Documentation/comments inside. -->
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+	  <!-- Set to the same as your project name/namespace -->
+	  <PackageId>p3rpc.classconstructor.Interfaces</PackageId>
+
+	  <!-- Use Semantic Versioning -->
+	  <Version>1.0.0</Version>
+	  <Authors>Rirurin</Authors>
+
+	  <!-- Description of your Package -->
+	  <Description>Public API for object and class manipulation in Unreal Engine (Persona 3 Reload specific)</Description>
+
+	  <!-- Link to your Source Code [GitHub Page, etc.] -->
+	  <PackageProjectUrl></PackageProjectUrl>
+	  <RepositoryUrl></RepositoryUrl>
+
+	  <!-- URL to the icon seen for your package in NuGet Search -->
+	  <PackageIconUrl>https://avatars1.githubusercontent.com/u/45473408</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>
