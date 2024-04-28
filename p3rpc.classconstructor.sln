@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "p3rpc.classconstructor", "p3rpc.classconstructor\p3rpc.classconstructor.csproj", "{612DD976-9763-4AEE-B8E3-4C448722D68C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "p3rpc.classconstructor.Interfaces", "p3rpc.classconstructor.Interfaces\p3rpc.classconstructor.Interfaces.csproj", "{6EA974F3-0C55-453B-B592-D0779ECFB818}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{612DD976-9763-4AEE-B8E3-4C448722D68C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{612DD976-9763-4AEE-B8E3-4C448722D68C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{612DD976-9763-4AEE-B8E3-4C448722D68C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{612DD976-9763-4AEE-B8E3-4C448722D68C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EA974F3-0C55-453B-B592-D0779ECFB818}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EA974F3-0C55-453B-B592-D0779ECFB818}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EA974F3-0C55-453B-B592-D0779ECFB818}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EA974F3-0C55-453B-B592-D0779ECFB818}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC4D69FB-D566-4C1A-843A-4A2BEC39E014}
+	EndGlobalSection
+EndGlobal

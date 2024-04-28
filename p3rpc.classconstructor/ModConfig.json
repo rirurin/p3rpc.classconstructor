@@ -1,0 +1,21 @@
+{
+  "ModId": "p3rpc.classconstructor",
+  "ModName": "P3RE Class Constructor",
+  "ModAuthor": "Rirurin",
+  "ModVersion": "1.0.0",
+  "ModDescription": "Utilities for modifying and creating classes/objects (Persona 3 Reload specific)",
+  "ModDll": "p3rpc.classconstructor.dll",
+  "ModIcon": "Preview.png",
+  "ModR2RManagedDll32": "x86/p3rpc.classconstructor.dll",
+  "ModR2RManagedDll64": "x64/p3rpc.classconstructor.dll",
+  "ModNativeDll32": "",
+  "ModNativeDll64": "",
+  "IsLibrary": false,
+  "ReleaseMetadataFileName": "p3rpc.classconstructor.ReleaseMetadata.json",
+  "PluginData": {},
+  "IsUniversalMod": false,
+  "ModDependencies": [ "reloaded.sharedlib.hooks" ],
+  "OptionalDependencies": [],
+  "SupportedAppId": [],
+  "ProjectUrl": ""
+}
