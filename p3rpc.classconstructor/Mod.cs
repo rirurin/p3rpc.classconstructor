@@ -78,8 +78,8 @@ namespace p3rpc.classconstructor
             _modRuntime.AddModule<ObjectMethods>();
             _modRuntime.RegisterModules();
 
-            //_modLoader.AddOrReplaceController<IClassMethods>(_owner, _modRuntime.GetModule<ClassMethods>());
-            //_modLoader.AddOrReplaceController<IObjectMethods>(_owner, _modRuntime.GetModule<ObjectMethods>());
+            _modLoader.AddOrReplaceController<IClassMethods>(_owner, _modRuntime.GetModule<ClassMethods>());
+            _modLoader.AddOrReplaceController<IObjectMethods>(_owner, _modRuntime.GetModule<ObjectMethods>());
         }
 
         #region Standard Overrides
@@ -100,7 +100,7 @@ namespace p3rpc.classconstructor
 
         public Type[] GetTypes() => new[] {
             typeof(IClassMethods),
-            typeof(IObjectMethods)
+            typeof(IObjectMethods),
         };
     }
 }

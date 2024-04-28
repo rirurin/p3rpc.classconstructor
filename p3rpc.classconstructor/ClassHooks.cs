@@ -79,12 +79,10 @@ namespace p3rpc.classconstructor
                 // change size
                 if (size <= classExtender.Size)
                 {
-                    //_context._utils.Log($"NOTICE: Extended size of class \"{className}\" (from {size} to {classExtender.Size})", LogLevel.Debug);
-                    _context._utils.Log($"NOTICE: Extended size of class \"{className}\" (from {size} to {classExtender.Size})");
+                    _context._utils.Log($"NOTICE: Extended size of class \"{className}\" (from {size} to {classExtender.Size})", LogLevel.Debug);
                     size = classExtender.Size;
                 }
-                //else _context._utils.Log($"ERROR: Class extender for \"{className}\" has defined size smaller than original class (from {size} to {classExtender.Size}). This has been rejected.", System.Drawing.Color.Red, LogLevel.Error);
-                else _context._utils.Log($"ERROR: Class extender for \"{className}\" has defined size smaller than original class (from {size} to {classExtender.Size}). This has been rejected.", System.Drawing.Color.Red);
+                else _context._utils.Log($"ERROR: Class extender for \"{className}\" has defined size smaller than original class (from {size} to {classExtender.Size}). This has been rejected.", System.Drawing.Color.Red, LogLevel.Error);
                 // hook ctor
                 if (classExtender.CtorHook != null && inClassCtor != 0)
                 {
@@ -130,8 +128,7 @@ namespace p3rpc.classconstructor
             {
                 if (retHook == null)
                 {
-                    //_context._utils.Log($"ERROR: retHook is null. Game will crash.", System.Drawing.Color.Red, LogLevel.Error);
-                    _context._utils.Log($"ERROR: retHook is null. Game will crash.", System.Drawing.Color.Red);
+                    _context._utils.Log($"ERROR: retHook is null. Game will crash.", System.Drawing.Color.Red, LogLevel.Error);
                     return;
                 }
                 retHook.OriginalFunction(x);
