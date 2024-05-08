@@ -6,8 +6,6 @@ namespace p3rpc.classconstructor
 {
     internal partial class ObjectMethods : ModuleBase<ClassConstructorContext>, IObjectMethods
     {
-        private Thread _findObjectThread { get; init; }
-        private BlockingCollection<FindObjectBase> _findObjects { get; init; } = new();
         public abstract class FindObjectBase
         {
             protected ObjectMethods Context { get; init; }

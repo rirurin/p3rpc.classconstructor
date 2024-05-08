@@ -74,6 +74,7 @@ namespace p3rpc.classconstructor
             _context = new(mainModule.BaseAddress, _configuration, _logger, startupScanner, _hooks, _modLoader.GetDirectoryForModId(_modConfig.ModId), utils, memory, sharedScans, memoryMethods);
             _modRuntime = new(_context);
 
+            _modRuntime.AddModule<ClassHooks>();
             _modRuntime.AddModule<ClassMethods>();
             _modRuntime.AddModule<ObjectMethods>();
             _modRuntime.RegisterModules();

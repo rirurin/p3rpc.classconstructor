@@ -17,22 +17,43 @@ namespace p3rpc.classconstructor
         public unsafe delegate void GetPrivateStaticClassBody(nint packageName, nint name, UClass** returnClass, nint registerNativeFunc, uint size, uint align, uint flags, ulong castFlags, nint config, nint inClassCtor, nint vtableHelperCtorCaller, nint addRefObjects, nint superFn, nint withinFn, byte isDynamic, nint dynamicFn);
         public UClass_DeferredRegister _deferredRegister { get; private set; }
         private string UClass_DeferredRegister_SIG = "40 53 48 83 EC 20 48 8B D9 E8 ?? ?? ?? ?? 48 8B 93 ?? ?? ?? ?? 48 8D 4C 24 ??";
+        public unsafe delegate void UClass_DeferredRegister(UClass* self, UClass* type, nint packageName, nint name);
 
         public UObjectProcessRegistrants _processRegistrants { get; private set; }
         private string UObjectProcessRegistrants_SIG = "48 8B C4 55 48 83 EC 70 48 89 58 ?? 48 8D 15 ?? ?? ?? ??";
         public delegate void UObjectProcessRegistrants();
+
+        public FName_Ctor _fnameCtor;
+        private string FNameCtor_SIG = "48 89 5C 24 ?? 57 48 83 EC 30 48 8B D9 48 89 54 24 ?? 33 C9 41 8B F8 4C 8B DA";
+        public unsafe delegate FName* FName_Ctor(FName* self, nint name, EFindType findType);
+
+        public UClass_FindFunctionByName _findFunctionByName;
+        private string UClass_FindFunctionByName_SIG = "48 89 54 24 ?? 53 55 56 57 41 55 48 83 EC 40";
+        public unsafe delegate UFunction* UClass_FindFunctionByName(UClass* self, FName name, int type); // 0 - ExcludeSuper, 1 - IncludeSuper
+
+        
         private ObjectMethods __objectMethods;
         private ClassMethods __classMethods;
         public unsafe ClassHooks(ClassConstructorContext context, Dictionary<string, ModuleBase<ClassConstructorContext>> modules) : base(context, modules)
         {
             _context._sharedScans.CreateListener("StaticConstructObject_Internal", addr => _context._utils.AfterSigScan(addr, _context._utils.GetDirectAddress, addr => _staticConstructObject = _context._utils.MakeHooker<StaticConstructObject_Internal>(StaticConstructObject_InternalImpl, addr)));
             _context._sharedScans.CreateListener("GetPrivateStaticClassBody", addr => _context._utils.AfterSigScan(addr, _context._utils.GetDirectAddress, addr => _staticClassBody = _context._utils.MakeHooker<GetPrivateStaticClassBody>(GetPrivateStaticClassBodyImpl, addr)));
+
             _context._sharedScans.AddScan<UClass_DeferredRegister>(UClass_DeferredRegister_SIG);
             _context._sharedScans.CreateListener<UClass_DeferredRegister>(addr => _context._utils.AfterSigScan(
                 addr, _context._utils.GetDirectAddress, addr => _deferredRegister = _context._utils.MakeWrapper<UClass_DeferredRegister>(addr)));
+
             _context._sharedScans.AddScan<UObjectProcessRegistrants>(UObjectProcessRegistrants_SIG);
             _context._sharedScans.CreateListener<UObjectProcessRegistrants>(addr => _context._utils.AfterSigScan(
                 addr, _context._utils.GetDirectAddress, addr => _processRegistrants = _context._utils.MakeWrapper<UObjectProcessRegistrants>(addr)));
+            // FName::FName(FName* this, wchar_t* Name, EFindFName FindType)
+            _context._sharedScans.AddScan<FName_Ctor>(FNameCtor_SIG);
+            _context._sharedScans.CreateListener<FName_Ctor>(addr => _context._utils.AfterSigScan(
+                addr, _context._utils.GetDirectAddress, addr => _fnameCtor = _context._utils.MakeWrapper<FName_Ctor>(addr)));
+
+            _context._sharedScans.AddScan<UClass_FindFunctionByName>(UClass_FindFunctionByName_SIG);
+            _context._sharedScans.CreateListener<UClass_FindFunctionByName>(addr => _context._utils.AfterSigScan(
+                addr, _context._utils.GetDirectAddress, addr => _findFunctionByName = _context._utils.MakeWrapper<UClass_FindFunctionByName>(addr)));
         }
         public override void Register()
         {
@@ -41,9 +62,7 @@ namespace p3rpc.classconstructor
             __classMethods = GetModule<ClassMethods>();
         }
 
-        public unsafe delegate void UClass_DeferredRegister(UClass* self, UClass* type, nint packageName, nint name);
-
-        private unsafe UObject* StaticConstructObject_InternalImpl(FStaticConstructObjectParameters* pParams)
+        public unsafe UObject* StaticConstructObject_InternalImpl(FStaticConstructObjectParameters* pParams)
         {
             var newObj = _staticConstructObject.OriginalFunction(pParams);
             if (__objectMethods._objectListeners.TryGetValue(_context.GetObjectType(newObj), out var listeners))
@@ -92,9 +111,9 @@ namespace p3rpc.classconstructor
             }
             // add class to static params map - collect info for dynamic class creation
             var packageNameStr = Marshal.PtrToStringUni(packageName);
+            /*
             if (className != null && packageNameStr != null)
             {
-                /*
                 __classFactory._classNameToStaticClassParams.TryAdd(className, new StaticClassParams(
                     packageNameStr,
                     className,
@@ -113,10 +132,13 @@ namespace p3rpc.classconstructor
                     isDynamic,
                     dynamicFn
                 ));
-                */
+                
             }
+            */
             _staticClassBody.OriginalFunction(packageName, name, returnClass, registerNativeFunc, size, align, flags, castFlags,
                 config, inClassCtor, vtableHelperCtorCaller, addRefObjects, superFn, withinFn, isDynamic, dynamicFn);
+            if (className != null)
+                __classMethods._classNameToType.TryAdd(className, (nint)(*returnClass));
         }
         public unsafe IHook<InternalConstructor> FollowThunkToGetAppropriateHook
             (nint addr, InternalConstructor ctorHook)

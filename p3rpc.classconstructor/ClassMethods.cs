@@ -8,6 +8,7 @@ namespace p3rpc.classconstructor
     internal class ClassMethods : ModuleBase<ClassConstructorContext>, IClassMethods
     {
         public ConcurrentDictionary<string, ClassExtenderParams> _classNameToClassExtender { get; private init; } = new();
+        public Dictionary<string, nint> _classNameToType { get; private init; } = new();
         public ClassMethods(ClassConstructorContext context, Dictionary<string, ModuleBase<ClassConstructorContext>> modules) : base(context, modules) { }
         public override void Register() { }
 

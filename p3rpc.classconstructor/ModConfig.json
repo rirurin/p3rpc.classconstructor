@@ -2,7 +2,7 @@
   "ModId": "p3rpc.classconstructor",
   "ModName": "P3RE Class Constructor",
   "ModAuthor": "Rirurin",
-  "ModVersion": "1.0.1",
+  "ModVersion": "1.1.0",
   "ModDescription": "Utilities for modifying and creating classes/objects (Persona 3 Reload specific)",
   "ModDll": "p3rpc.classconstructor.dll",
   "ModIcon": "Preview.png",
