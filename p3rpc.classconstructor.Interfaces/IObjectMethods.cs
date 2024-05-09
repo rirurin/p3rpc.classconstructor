@@ -2,6 +2,7 @@
 using p3rpc.nativetypes.Interfaces;
 
 namespace p3rpc.classconstructor.Interfaces;
+
 public interface IObjectMethods
 {
     // Object Listeners
@@ -36,6 +37,9 @@ public interface IObjectMethods
     public unsafe UObject* SpawnObject(string type, UObject* owner, FName? name = null);
     public unsafe UObject* SpawnObject(string type, UObject* owner, string name);
     // Invoke Methods
-    public unsafe bool GetFunctionEx(UObject* obj, string name, out UFunction* outFunc);
-    public unsafe void ProcessEvent(UObject* obj, string funcName, params (string name, nint value, nint size)[] funcParams);
+    public unsafe bool GetFunction(UObject* obj, string name, out UFunction* outFunc);
+    public unsafe void ProcessEvent(UObject* obj, string funcName);
+    public unsafe void ProcessEvent(UObject* obj, string funcName, params ProcessEventParameterBase[] funcParams);
+    public unsafe TReturnType ProcessEvent<TReturnType>(UObject* obj, string funcName) where TReturnType : unmanaged;
+    public unsafe TReturnType ProcessEvent<TReturnType>(UObject* obj, string funcName, params ProcessEventParameterBase[] funcParams) where TReturnType : unmanaged;
 }

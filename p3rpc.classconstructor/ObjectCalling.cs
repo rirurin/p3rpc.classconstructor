@@ -34,40 +34,34 @@ namespace p3rpc.classconstructor
         }
 
         // ProcessEvent (call functions exposed to blueprints)
-        // GetFunctionUsingHook
+        /*
         public unsafe bool GetFunction(UObject* obj, string name, out UFunction* outFunc)
         {
             outFunc = __classHooks._findFunctionByName.Invoke(obj->ClassPrivate, GetFName(name), 1);
             return outFunc != null;
         }
+        */
         // GetFunction
+
+        // O(1) retrieval of a function by name in a given class. Called for each class and it's inherited classes function maps
         private unsafe bool FindFunctionByName(UClass* type, FName name, out UFunction* outFunc)
         {
-            TMap<FName, nint> funcs = type->func_map; // TMap<FName, UFunction*>
-            outFunc = null;
-            for (int i = 0; i < funcs.mapNum; i++)
-            {
-                UFunction* currFunc = *(UFunction**)funcs.GetByIndex(i);
-                if (((UObject*)currFunc)->NamePrivate.Equals(name))
-                    outFunc = currFunc;
-            }
-            return outFunc != null;
-        }
-
-        private unsafe bool FindFunctionByNameEx(UClass* type, FName name, out UFunction* outFunc)
-        {
             var searchFuncByHash = new TMapHashable<FName, nint>((nint)(&type->func_map), 0x40, 0x48);
-            outFunc = *(UFunction**)searchFuncByHash.TryGetByHash(name);
-            return outFunc != null;
+            outFunc = null;
+            UFunction** ppTgtFunc = (UFunction**)searchFuncByHash.TryGetByHash(name);
+            if (ppTgtFunc == null) return false;
+            outFunc = *ppTgtFunc;
+            return true;
         }
-        public unsafe bool GetFunctionEx(UObject* obj, string name, out UFunction* outFunc)
+        // Get a target function
+        public unsafe bool GetFunction(UObject* obj, string name, out UFunction* outFunc)
         {
             UClass* curr_class = obj->ClassPrivate;
             outFunc = null;
             FName targetName = GetFName(name);
             while (curr_class != null)
             {
-                if (FindFunctionByNameEx(curr_class, targetName, out outFunc)) return true;
+                if (FindFunctionByName(curr_class, targetName, out outFunc)) return true;
                 else curr_class = (UClass*)((UStruct*)curr_class)->super_struct;
             }
             return false;
@@ -122,45 +116,94 @@ namespace p3rpc.classconstructor
             return ret;
         }
 
-        // Call functions with one or more params and no return value
-        public unsafe void ProcessEvent(UObject* obj, string funcName, params (string name, nint value, nint size)[] funcParams)
+        private unsafe bool ProcessEventCollectParameters(nint paramAlloc, UFunction* targetFunc, out Dictionary<ProcessEventParameterBase, nint> outNativeProps, params ProcessEventParameterBase[] funcParams)
         {
-            if (!GetFunction(obj, funcName, out UFunction* targetFunc)) return;
-            int paramsSize = GetTotalParameterSize(targetFunc);
-            nint pParams = _context._memoryMethods.FMemory_Malloc(paramsSize, (uint)sizeof(nint));
-            // build param data
+            outNativeProps = new();
             foreach (var param in funcParams)
             {
-                FProperty* curr_prop = FindParameter(targetFunc, param.name);
-                if (param.size != curr_prop->element_size)
+                FProperty* curr_prop = FindParameter(targetFunc, param.Name);
+                outNativeProps.Add(param, (nint)curr_prop);
+                if (curr_prop == null)
                 {
-                    _context._utils.Log($"ERROR: Size of value {param.name} of type {param.value.GetType()} doesn't match target property " +
-                        $"(got {param.size}, should be {curr_prop->element_size})", System.Drawing.Color.Red, LogLevel.Error);
+                    _context._utils.Log($"ERROR: Function \"{GetObjectName((UObject*)targetFunc)}\" doesn't have a parameter named \"{param.Name}\"", System.Drawing.Color.Red, LogLevel.Error);
+                    return false;
                 }
-                nint paramStoreTmp = _context._memoryMethods.FMemory_Malloc(param.size, (uint)sizeof(nint));
-                NativeMemory.Copy((void*)paramStoreTmp, (void*)(pParams + curr_prop->offset_internal), (nuint)param.size);
-                _context._memoryMethods.FMemory_Free(paramStoreTmp);
+                if (param.Size != curr_prop->element_size)
+                {
+                    _context._utils.Log($"ERROR: Size of value \"{param.Name}\" of type {param.Value.GetType()} doesn't match target property " +
+                        $"(got {param.Size}, should be {curr_prop->element_size})", System.Drawing.Color.Red, LogLevel.Error);
+                    return false;
+                }
+                param.AddToAllocation(paramAlloc + curr_prop->offset_internal);
             }
-            // call UObject->ProcessEvent
-            var processEventWrapper = _context._utils.MakeWrapper<UObject_ProcessEvent>(*(nint*)(obj->_vtable + 0x220));
-            processEventWrapper.Invoke(obj, targetFunc, pParams);
-            _context._memoryMethods.FMemory_Free(pParams);
+            return true;
         }
-        // Call functions with no params or return value
-        /*
+
+        private unsafe void ProcessEventCopyReferenceValues(nint paramAlloc, Dictionary<ProcessEventParameterBase, nint> nativeProps)
+        {
+            foreach (var nativeProp in nativeProps)
+                nativeProp.Key.RetrieveValue(paramAlloc + ((FProperty*)nativeProp.Value)->offset_internal);
+        }
+
+        private unsafe nint ProcessEventAllocParameterStorage(UFunction* targetFunc)
+        {
+            int paramsSize = GetTotalParameterSize(targetFunc);
+            nint pParams = _context._memoryMethods.FMemory_Malloc(paramsSize, (uint)sizeof(nint));
+            NativeMemory.Fill((void*)pParams, (nuint)paramsSize, 0);
+            return pParams;
+        }
+
         public unsafe void ProcessEvent(UObject* obj, string funcName)
         {
             if (!GetFunction(obj, funcName, out UFunction* targetFunc)) return;
-            int paramsSize = GetTotalParameterSize(targetFunc);
-            nint pParams = _context._memoryMethods.FMemory_Malloc(paramsSize, (uint)sizeof(nint));
+            var pParams = ProcessEventAllocParameterStorage(targetFunc);
             var processEventWrapper = _context._utils.MakeWrapper<UObject_ProcessEvent>(*(nint*)(obj->_vtable + 0x220));
-            processEventWrapper.Invoke(obj, targetFunc, pParams);
+            processEventWrapper.Invoke(obj, targetFunc, pParams); // UObject->ProcessEvent (vtable + 0x220 as of UE 4.27)
             _context._memoryMethods.FMemory_Free(pParams);
         }
-        // Call functions with one or more params and a return value
-        public unsafe T ProcessEvent<T>(UObject* obj, string funcName, params (string name, nint value, nint size)[] funcParams)
-            where T : unmanaged => default(T);
-        */
+
+        public unsafe void ProcessEvent(UObject* obj, string funcName, params ProcessEventParameterBase[] funcParams)
+        {
+            if (!GetFunction(obj, funcName, out UFunction* targetFunc)) return;
+            var pParams = ProcessEventAllocParameterStorage(targetFunc);
+            if (ProcessEventCollectParameters(pParams, targetFunc, out var fParams, funcParams))
+            {
+                var processEventWrapper = _context._utils.MakeWrapper<UObject_ProcessEvent>(*(nint*)(obj->_vtable + 0x220));
+                processEventWrapper.Invoke(obj, targetFunc, pParams); // UObject->ProcessEvent
+                ProcessEventCopyReferenceValues(pParams, fParams);
+            }
+            _context._memoryMethods.FMemory_Free(pParams);
+        }
+
+        public unsafe TReturnType ProcessEvent<TReturnType>(UObject* obj, string funcName) where TReturnType : unmanaged
+        {
+            if (!GetFunction(obj, funcName, out UFunction* targetFunc)) return default(TReturnType);
+            var pParams = ProcessEventAllocParameterStorage(targetFunc);
+            var processEventWrapper = _context._utils.MakeWrapper<UObject_ProcessEvent>(*(nint*)(obj->_vtable + 0x220));
+            processEventWrapper.Invoke(obj, targetFunc, pParams);
+
+            FProperty* ret_prop = FindReturnValue(targetFunc);
+            TReturnType ret_value = *(TReturnType*)(pParams + ret_prop->offset_internal);
+            _context._memoryMethods.FMemory_Free(pParams);
+            return ret_value;
+        }
+        public unsafe TReturnType ProcessEvent<TReturnType>(UObject* obj, string funcName, params ProcessEventParameterBase[] funcParams) where TReturnType : unmanaged
+        {
+            if (!GetFunction(obj, funcName, out UFunction* targetFunc)) return default(TReturnType);
+            var pParams = ProcessEventAllocParameterStorage(targetFunc);
+            TReturnType ret_value = default(TReturnType);
+            if (ProcessEventCollectParameters(pParams, targetFunc, out var fParams, funcParams))
+            {
+                var processEventWrapper = _context._utils.MakeWrapper<UObject_ProcessEvent>(*(nint*)(obj->_vtable + 0x220));
+                processEventWrapper.Invoke(obj, targetFunc, pParams);
+                ProcessEventCopyReferenceValues(pParams, fParams);
+
+                FProperty* ret_prop = FindReturnValue(targetFunc);
+                ret_value = *(TReturnType*)(pParams + ret_prop->offset_internal);
+            }
+            _context._memoryMethods.FMemory_Free(pParams);
+            return ret_value;
+        }
 
         public unsafe delegate void UObject_ProcessEvent(UObject* self, UFunction* targetFunc, nint paramData);
     }

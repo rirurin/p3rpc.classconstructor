@@ -27,9 +27,11 @@ namespace p3rpc.classconstructor
         private string FNameCtor_SIG = "48 89 5C 24 ?? 57 48 83 EC 30 48 8B D9 48 89 54 24 ?? 33 C9 41 8B F8 4C 8B DA";
         public unsafe delegate FName* FName_Ctor(FName* self, nint name, EFindType findType);
 
+        /* 
         public UClass_FindFunctionByName _findFunctionByName;
         private string UClass_FindFunctionByName_SIG = "48 89 54 24 ?? 53 55 56 57 41 55 48 83 EC 40";
         public unsafe delegate UFunction* UClass_FindFunctionByName(UClass* self, FName name, int type); // 0 - ExcludeSuper, 1 - IncludeSuper
+        */
 
         
         private ObjectMethods __objectMethods;
@@ -50,10 +52,11 @@ namespace p3rpc.classconstructor
             _context._sharedScans.AddScan<FName_Ctor>(FNameCtor_SIG);
             _context._sharedScans.CreateListener<FName_Ctor>(addr => _context._utils.AfterSigScan(
                 addr, _context._utils.GetDirectAddress, addr => _fnameCtor = _context._utils.MakeWrapper<FName_Ctor>(addr)));
-
+            /*
             _context._sharedScans.AddScan<UClass_FindFunctionByName>(UClass_FindFunctionByName_SIG);
             _context._sharedScans.CreateListener<UClass_FindFunctionByName>(addr => _context._utils.AfterSigScan(
                 addr, _context._utils.GetDirectAddress, addr => _findFunctionByName = _context._utils.MakeWrapper<UClass_FindFunctionByName>(addr)));
+            */
         }
         public override void Register()
         {
