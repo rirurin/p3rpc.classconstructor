@@ -18,12 +18,16 @@ p3rpc.classconstructor.Interfaces.IObjectMethods.FindAllObjectsNamed(string! tar
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindAllOf(string! objType) -> System.Collections.Generic.ICollection<nint>!
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindAllOfAsync(string! objType, System.Action<System.Collections.Generic.ICollection<nint>!>! foundCb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindFirstOf(string! objType) -> p3rpc.nativetypes.Interfaces.UObject*
+p3rpc.classconstructor.Interfaces.IObjectMethods.FindFirstOf<TObjectType>() -> TObjectType*
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindFirstOfAsync(string! objType, System.Action<nint>! foundCb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindFirstSubclassOf(p3rpc.nativetypes.Interfaces.UClass* super) -> p3rpc.nativetypes.Interfaces.UObject*
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindFirstSubclassOf(string! objType) -> p3rpc.nativetypes.Interfaces.UObject*
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindObject(string! targetObj, string? objType = null) -> p3rpc.nativetypes.Interfaces.UObject*
+p3rpc.classconstructor.Interfaces.IObjectMethods.FindObject<TObjectType>(string! targetObj) -> TObjectType*
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindObjectAsync(string! targetObj, string? objType, System.Action<nint>! foundCb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.FindObjectAsync(string! targetObj, System.Action<nint>! foundCb) -> void
+p3rpc.classconstructor.Interfaces.IObjectMethods.FindObjectFast(string! objName, p3rpc.nativetypes.Interfaces.UObject* outer, string! objClass) -> p3rpc.nativetypes.Interfaces.UObject*
+p3rpc.classconstructor.Interfaces.IObjectMethods.FindObjectFast<TObjectType>(string! objName, p3rpc.nativetypes.Interfaces.UObject* outer) -> TObjectType*
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetEngineTransient() -> p3rpc.nativetypes.Interfaces.UObject*
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetFName(p3rpc.nativetypes.Interfaces.FName name) -> string!
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetFName(string! name) -> p3rpc.nativetypes.Interfaces.FName
@@ -31,15 +35,21 @@ p3rpc.classconstructor.Interfaces.IObjectMethods.GetFullName(p3rpc.nativetypes.I
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetFunction(p3rpc.nativetypes.Interfaces.UObject* obj, string! name, out p3rpc.nativetypes.Interfaces.UFunction* outFunc) -> bool
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetObjectName(p3rpc.nativetypes.Interfaces.UObject* obj) -> string!
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetObjectType(p3rpc.nativetypes.Interfaces.UObject* obj) -> string!
+p3rpc.classconstructor.Interfaces.IObjectMethods.GetSubsystem(p3rpc.nativetypes.Interfaces.UGameInstance* gameInstance, string! subsystem) -> nint
+p3rpc.classconstructor.Interfaces.IObjectMethods.GetSubsystem<TSubsystem>(p3rpc.nativetypes.Interfaces.UGameInstance* gameInstance) -> TSubsystem*
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetType(string! type) -> p3rpc.nativetypes.Interfaces.UClass*
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetTypeAsync(string! type, System.Action<nint>! foundCb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.IsObjectSubclassOf(p3rpc.nativetypes.Interfaces.UObject* obj, p3rpc.nativetypes.Interfaces.UClass* type) -> bool
 p3rpc.classconstructor.Interfaces.IObjectMethods.NotifyOnNewObject(p3rpc.nativetypes.Interfaces.UClass* type, System.Action<nint>! cb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.NotifyOnNewObject(string! typeName, System.Action<nint>! cb) -> void
+p3rpc.classconstructor.Interfaces.IObjectMethods.NotifyOnNewObject<TNotifyType>(System.Action<nint>! cb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.ProcessEvent(p3rpc.nativetypes.Interfaces.UObject* obj, string! funcName) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.ProcessEvent(p3rpc.nativetypes.Interfaces.UObject* obj, string! funcName, params ProcessEventParameterBase![]! funcParams) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.ProcessEvent<TReturnType>(p3rpc.nativetypes.Interfaces.UObject* obj, string! funcName) -> TReturnType
 p3rpc.classconstructor.Interfaces.IObjectMethods.ProcessEvent<TReturnType>(p3rpc.nativetypes.Interfaces.UObject* obj, string! funcName, params ProcessEventParameterBase![]! funcParams) -> TReturnType
+p3rpc.classconstructor.Interfaces.IObjectMethods.SpawnActor(p3rpc.nativetypes.Interfaces.UClass* type) -> p3rpc.nativetypes.Interfaces.AActor*
+p3rpc.classconstructor.Interfaces.IObjectMethods.SpawnActor(string! type) -> p3rpc.nativetypes.Interfaces.AActor*
+p3rpc.classconstructor.Interfaces.IObjectMethods.SpawnActor<TActorType>() -> TActorType*
 p3rpc.classconstructor.Interfaces.IObjectMethods.SpawnObject(p3rpc.nativetypes.Interfaces.UClass* type, p3rpc.nativetypes.Interfaces.UObject* owner, p3rpc.nativetypes.Interfaces.FName? name = null) -> p3rpc.nativetypes.Interfaces.UObject*
 p3rpc.classconstructor.Interfaces.IObjectMethods.SpawnObject(string! type, p3rpc.nativetypes.Interfaces.UObject* owner, p3rpc.nativetypes.Interfaces.FName? name = null) -> p3rpc.nativetypes.Interfaces.UObject*
 p3rpc.classconstructor.Interfaces.IObjectMethods.SpawnObject(string! type, p3rpc.nativetypes.Interfaces.UObject* owner, string! name) -> p3rpc.nativetypes.Interfaces.UObject*

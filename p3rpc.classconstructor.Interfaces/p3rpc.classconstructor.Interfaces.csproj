@@ -33,7 +33,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="p3rpc.nativetypes.Interfaces" Version="1.4.1" />
+    <PackageReference Include="p3rpc.nativetypes.Interfaces" Version="1.4.2" />
   </ItemGroup>
 
 </Project>

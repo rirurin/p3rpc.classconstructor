@@ -4,6 +4,7 @@ using p3rpc.nativetypes.Interfaces;
 using Reloaded.Hooks.Definitions;
 using System.Runtime.InteropServices;
 using static p3rpc.classconstructor.Interfaces.IClassMethods;
+using static p3rpc.nativetypes.Interfaces.IUIMethods;
 
 namespace p3rpc.classconstructor
 {
@@ -33,7 +34,17 @@ namespace p3rpc.classconstructor
         public unsafe delegate UFunction* UClass_FindFunctionByName(UClass* self, FName name, int type); // 0 - ExcludeSuper, 1 - IncludeSuper
         */
 
-        
+        private string FUObjectHashTables_Get_SIG = "E8 ?? ?? ?? ?? 48 8B F8 33 C0 F0 0F B1 35 ?? ?? ?? ??";
+        public FUObjectHashTables_Get _getObjectHashTables;
+        public unsafe delegate FUObjectHashTables* FUObjectHashTables_Get();
+
+        public GetSpriteItemMaskInstance _getSpriteItemMaskInstance;
+
+        private string UWorld_SpawnActor_SIG = "40 55 53 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ?? ?? ?? ?? 48 81 EC F8 01 00 00 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 ??";
+        public UWorld_SpawnActor _spawnActor;
+        public unsafe delegate AActor* UWorld_SpawnActor(UWorld* self, UClass* type, FTransform* pUserTransform, FActorSpawnParameters* spawnParams);
+
+
         private ObjectMethods __objectMethods;
         private ClassMethods __classMethods;
         public unsafe ClassHooks(ClassConstructorContext context, Dictionary<string, ModuleBase<ClassConstructorContext>> modules) : base(context, modules)
@@ -57,6 +68,15 @@ namespace p3rpc.classconstructor
             _context._sharedScans.CreateListener<UClass_FindFunctionByName>(addr => _context._utils.AfterSigScan(
                 addr, _context._utils.GetDirectAddress, addr => _findFunctionByName = _context._utils.MakeWrapper<UClass_FindFunctionByName>(addr)));
             */
+            // For Actor Spawning
+            _context._sharedScans.CreateListener<GetSpriteItemMaskInstance>(addr => _context._utils.AfterSigScan(addr, _context._utils.GetIndirectAddressShort,
+                addr => _getSpriteItemMaskInstance = _context._utils.MakeWrapper<GetSpriteItemMaskInstance>(addr)));
+            _context._utils.SigScan(UWorld_SpawnActor_SIG, "UWorld::SpawnActor", _context._utils.GetDirectAddress,
+                addr => _spawnActor = _context._utils.MakeWrapper<UWorld_SpawnActor>(addr));
+            // Fast object searching
+            _context._sharedScans.AddScan<FUObjectHashTables_Get>(FUObjectHashTables_Get_SIG);
+            _context._sharedScans.CreateListener<FUObjectHashTables_Get>(addr => _context._utils.AfterSigScan(
+                addr, _context._utils.GetIndirectAddressShort, addr => _getObjectHashTables = _context._utils.MakeWrapper<FUObjectHashTables_Get>(addr)));
         }
         public override void Register()
         {

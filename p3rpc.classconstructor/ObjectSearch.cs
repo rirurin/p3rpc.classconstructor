@@ -91,6 +91,23 @@ namespace p3rpc.classconstructor
             });
             return ret;
         }
+        public unsafe TObjectType* FindObject<TObjectType>(string targetObj) where TObjectType : unmanaged
+        {
+            TObjectType* ret = null;
+            ForEachObject(currAddr =>
+            {
+                var currObj = (FUObjectItem*)currAddr;
+                if (_context.DoesNameMatch(currObj->Object, targetObj))
+                {
+                    if (_context.DoesClassMatch(currObj->Object, typeof(TObjectType).Name.Substring(1)))
+                    {
+                        ret = (TObjectType*)currObj->Object;
+                        return;
+                    }
+                }
+            });
+            return ret;
+        }
         public unsafe ICollection<nint> FindAllObjectsNamed(string targetObj, string? objType = null)
         {
             var objects = new List<nint>();
@@ -114,6 +131,20 @@ namespace p3rpc.classconstructor
                 if (_context.DoesClassMatch(currObj->Object, objType))
                 {
                     ret = currObj->Object;
+                    return;
+                }
+            });
+            return ret;
+        }
+        public unsafe TObjectType* FindFirstOf<TObjectType>() where TObjectType : unmanaged
+        {
+            TObjectType* ret = null;
+            ForEachObject(currAddr =>
+            {
+                var currObj = (FUObjectItem*)currAddr;
+                if (_context.DoesClassMatch(currObj->Object, typeof(TObjectType).Name.Substring(1)))
+                {
+                    ret = (TObjectType*)currObj->Object;
                     return;
                 }
             });

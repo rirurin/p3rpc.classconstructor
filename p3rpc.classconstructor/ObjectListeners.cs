@@ -12,5 +12,7 @@ namespace p3rpc.classconstructor
             if (_objectListeners.TryGetValue(typeName, out var listener)) listener.Add(cb);
             else _objectListeners.TryAdd(typeName, new() { cb });
         }
+        public unsafe void NotifyOnNewObject<TNotifyType>(Action<nint> cb) where TNotifyType : unmanaged
+            => NotifyOnNewObject(typeof(TNotifyType).Name.Substring(1), cb);
     }
 }

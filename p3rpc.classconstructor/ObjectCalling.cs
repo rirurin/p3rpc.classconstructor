@@ -3,6 +3,7 @@ using p3rpc.commonmodutils;
 using p3rpc.nativetypes.Interfaces;
 using System;
 using System.Runtime.InteropServices;
+using static p3rpc.nativetypes.Interfaces.IUIMethods;
 
 namespace p3rpc.classconstructor
 {
@@ -32,16 +33,6 @@ namespace p3rpc.classconstructor
                 return SpawnObject((UClass*)typePtr, owner, AddFName(name));
             return null;
         }
-
-        // ProcessEvent (call functions exposed to blueprints)
-        /*
-        public unsafe bool GetFunction(UObject* obj, string name, out UFunction* outFunc)
-        {
-            outFunc = __classHooks._findFunctionByName.Invoke(obj->ClassPrivate, GetFName(name), 1);
-            return outFunc != null;
-        }
-        */
-        // GetFunction
 
         // O(1) retrieval of a function by name in a given class. Called for each class and it's inherited classes function maps
         private unsafe bool FindFunctionByName(UClass* type, FName name, out UFunction* outFunc)
@@ -115,7 +106,7 @@ namespace p3rpc.classconstructor
             });
             return ret;
         }
-
+        // ProcessEvent (call functions exposed to blueprints)
         private unsafe bool ProcessEventCollectParameters(nint paramAlloc, UFunction* targetFunc, out Dictionary<ProcessEventParameterBase, nint> outNativeProps, params ProcessEventParameterBase[] funcParams)
         {
             outNativeProps = new();
@@ -206,5 +197,55 @@ namespace p3rpc.classconstructor
         }
 
         public unsafe delegate void UObject_ProcessEvent(UObject* self, UFunction* targetFunc, nint paramData);
+
+        // Actor spawning
+        public unsafe AActor* SpawnActor(UClass* type)
+        {
+            UWorld* currWorld = *(UWorld**)__classHooks._getSpriteItemMaskInstance.Invoke();
+            FActorSpawnParameters spawnParams = new();
+            FTransform transform = new FTransform();
+            spawnParams.objectFlags = 8;
+            return __classHooks._spawnActor.Invoke(currWorld, type, &transform, &spawnParams);
+        }
+
+        public unsafe AActor* SpawnActor(string type) => SpawnActor(GetType(type));
+        public unsafe TActorType* SpawnActor<TActorType>() where TActorType : unmanaged => (TActorType*)SpawnActor(GetType(typeof(TActorType).Name.Substring(1)));
+
+        // Actor components
+
+        // Game subsystem
+        public unsafe TSubsystem* GetSubsystem<TSubsystem>(UGameInstance* gameInstance) where TSubsystem : unmanaged
+        {
+            var subsystemSearch = new TMapHashable<HashablePointer, nint>((nint)(&gameInstance->Subsystems.SubsystemMap), 0x40, 0x48);
+            TSubsystem** foundSubsystem = (TSubsystem**)subsystemSearch.TryGetByHash(((nint)GetType(typeof(TSubsystem).Name.Substring(1))).AsHashable());
+            return (foundSubsystem != null) ? *foundSubsystem : null;
+        }
+
+        public unsafe nint GetSubsystem(UGameInstance* gameInstance, string subsystem)
+        {
+            var subsystemSearch = new TMapHashable<HashablePointer, nint>((nint)(&gameInstance->Subsystems.SubsystemMap), 0x40, 0x48);
+            var foundSubsystem = subsystemSearch.TryGetByHash(((nint)GetType(subsystem)).AsHashable());
+            return (foundSubsystem != null) ? *foundSubsystem : nint.Zero;
+        }
+
+        // Fast object searching
+        public unsafe UObject* FindObjectFast(string objName, UObject* outer, string objClass)
+        {
+            FUObjectHashTables* hashTables = __classHooks._getObjectHashTables.Invoke();
+            var targetObjectHash = (int)(GetFName(objName).GetTypeHash() + ((nint)outer >> 6));
+            var outerHashesCheck = new TMapHashable<HashableInt, nint>((nint)(&hashTables->HashesOuter), 0x40, 0x48);
+            var resultObject = (UObject**)outerHashesCheck.TryGetByHash(targetObjectHash.AsHashable());
+            if (resultObject != null)
+            {
+                var foundObject = *resultObject;
+                UClass* targetType = GetType(objClass);
+                if (foundObject->NamePrivate.Equals(GetFName(objName)) 
+                    && foundObject->ClassPrivate == targetType)
+                    return foundObject;
+            }
+            return null;
+        }
+        public unsafe TObjectType* FindObjectFast<TObjectType>(string objName, UObject* outer) where TObjectType : unmanaged
+            => (TObjectType*)FindObjectFast(objName, outer, typeof(TObjectType).Name.Substring(1));
     }
 }
