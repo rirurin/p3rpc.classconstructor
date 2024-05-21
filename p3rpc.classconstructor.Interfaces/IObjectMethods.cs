@@ -40,6 +40,7 @@ public interface IObjectMethods
     public unsafe bool IsObjectSubclassOf(UObject* obj, UClass* type);
     public unsafe bool DoesNameMatch(UObject* tgtObj, string name);
     public unsafe bool DoesClassMatch(UObject* tgtObj, string name);
+    public unsafe void MarkObjectAsRoot(UObject* obj); // Stop a spawned object from being GC'd
     // Object Spawning
     public unsafe UObject* SpawnObject(UClass* type, UObject* owner, FName? name = null);
     public unsafe UObject* SpawnObject(string type, UObject* owner, FName? name = null);

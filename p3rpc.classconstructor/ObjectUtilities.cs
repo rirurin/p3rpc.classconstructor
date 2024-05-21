@@ -31,5 +31,13 @@ namespace p3rpc.classconstructor
         public unsafe bool IsObjectSubclassOf(UObject* obj, UClass* type) => _context.IsObjectSubclassOf(obj, type);
         public unsafe bool DoesNameMatch(UObject* tgtObj, string name) => _context.DoesNameMatch(tgtObj, name);
         public unsafe bool DoesClassMatch(UObject* tgtObj, string name) => _context.DoesClassMatch(tgtObj, name);
+
+
+        // https://github.com/rirurin/Unreal.ObjectDumpToJson/blob/da15d2376084f59ca6b46b990d5ab793673cb3bd/Unreal.ObjectDumpToJson/ObjectDump.cs#L36
+        public unsafe void MarkObjectAsRoot(UObject* obj)
+        {
+            var target_item = &_context.g_objectArray->Objects[obj->InternalIndex >> 0x10][obj->InternalIndex & 0xFFFF];
+            target_item->Flags |= EInternalObjectFlags.RootSet;
+        }
     }
 }

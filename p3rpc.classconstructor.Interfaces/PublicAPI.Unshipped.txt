@@ -40,6 +40,7 @@ p3rpc.classconstructor.Interfaces.IObjectMethods.GetSubsystem<TSubsystem>(p3rpc.
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetType(string! type) -> p3rpc.nativetypes.Interfaces.UClass*
 p3rpc.classconstructor.Interfaces.IObjectMethods.GetTypeAsync(string! type, System.Action<nint>! foundCb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.IsObjectSubclassOf(p3rpc.nativetypes.Interfaces.UObject* obj, p3rpc.nativetypes.Interfaces.UClass* type) -> bool
+p3rpc.classconstructor.Interfaces.IObjectMethods.MarkObjectAsRoot(p3rpc.nativetypes.Interfaces.UObject* obj) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.NotifyOnNewObject(p3rpc.nativetypes.Interfaces.UClass* type, System.Action<nint>! cb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.NotifyOnNewObject(string! typeName, System.Action<nint>! cb) -> void
 p3rpc.classconstructor.Interfaces.IObjectMethods.NotifyOnNewObject<TNotifyType>(System.Action<nint>! cb) -> void
