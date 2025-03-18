@@ -114,6 +114,7 @@ namespace p3rpc.classconstructor
             nint dynamicFn)
         {
             var className = Marshal.PtrToStringUni(name);
+            //_context._utils.Log($"[Constructor] {className}: 0x{inClassCtor:X}");
             //_utils.Log($"Reading class {className}");
             // check if class has been extended, and do appropriate actions
             if (className != null && __classMethods._classNameToClassExtender.TryGetValue(className, out var classExtender))
@@ -179,7 +180,10 @@ namespace p3rpc.classconstructor
                 retHook.OriginalFunction(x);
             };
             ctorHookReal += ctorHook;
-            retHook = _context._utils.MakeHooker(ctorHookReal, addr).Activate();
+            var offset = (int)(addr - (nint)_context._baseAddress);
+            var transformed = _context._utils.GetAddressMayThunk(offset);
+            //_context._utils.Log($"Transformed address: {addr:X} -> {transformed:X}");
+            retHook = _context._utils.MakeHooker(ctorHookReal, (long)transformed).Activate();
             return retHook;
         }
     }
